@@ -12,6 +12,5 @@ Aplikasi web sederhana untuk belajar bahasa Spanyol, dibangun dengan **Laravel +
 
 > Aplikasi ini dibuat seadanya, maklum masih newbie.
 >
-> Saya masih pemula, jadi kritik dan saran yang membangun sangat saya
-> harapkan. Jangan di-bully ya 🙏
+> Masih pemula
 >
