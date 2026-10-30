@@ -4,6 +4,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\LearningController;
 use App\Http\Controllers\ModuleController;
 use App\Http\Controllers\QuizController;
+use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\VocabularyController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -23,4 +24,9 @@ Route::post('/quiz/finish', [QuizController::class, 'finish'])->name('quiz.finis
 Route::get('/vocabulary', [VocabularyController::class, 'index'])->name('vocabulary');
 Route::post('/vocabulary/{wordBreakdown}/mastery', [VocabularyController::class, 'toggleMastery'])->name('vocabulary.mastery');
 
-Route::get('/settings', fn () => Inertia::render('coming-soon', ['title' => 'Settings', 'description' => 'Customize your experience.']))->name('settings');
+Route::get('/settings', [SettingsController::class, 'show'])->name('settings');
+Route::patch('/settings/profile', [SettingsController::class, 'updateProfile'])->name('settings.profile');
+Route::put('/settings/password', [SettingsController::class, 'updatePassword'])->name('settings.password');
+Route::post('/settings/preferences', [SettingsController::class, 'updatePreferences'])->name('settings.preferences');
+Route::post('/settings/reset-progress', [SettingsController::class, 'resetProgress'])->name('settings.reset-progress');
+Route::delete('/settings/account', [SettingsController::class, 'deleteAccount'])->name('settings.account');
