@@ -13,7 +13,9 @@ class ExampleTest extends TestCase
     public function test_the_application_returns_a_successful_response(): void
     {
         $response = $this->get('/');
+        $response->assertRedirect('/dashboard');
 
-        $response->assertStatus(200);
+        $dashboardResponse = $this->get('/dashboard');
+        $dashboardResponse->assertStatus(200);
     }
 }
