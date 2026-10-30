@@ -1,5 +1,5 @@
 import { Link, usePage } from '@inertiajs/react';
-import { BookOpenIcon, LanguagesIcon, LayoutDashboardIcon, LibraryIcon, SettingsIcon, SparklesIcon } from 'lucide-react';
+import { AlertCircleIcon, BookOpenIcon, CheckCircle2Icon, LanguagesIcon, LayoutDashboardIcon, LibraryIcon, SettingsIcon, SparklesIcon } from 'lucide-react';
 import type { PropsWithChildren } from 'react';
 
 import { MotivationMarquee } from '@/components/motivation-marquee';
@@ -85,7 +85,28 @@ export default function AppLayout({ title, description, children }: AppLayoutPro
                             {description && <p className="text-xs text-muted-foreground">{description}</p>}
                         </div>
                     </header>
-                    <div className="mx-auto flex w-full min-w-0 max-w-4xl flex-1 flex-col gap-6 px-4 pt-2 pb-10 md:px-6">{children}</div>
+                    <div className="mx-auto flex w-full min-w-0 max-w-4xl flex-1 flex-col gap-6 px-4 pt-2 pb-10 md:px-6">
+                        {(() => {
+                            const flash = (usePage().props as { flash?: { success?: string | null; error?: string | null } }).flash;
+                            return (
+                                <>
+                                    {flash?.error && (
+                                        <div className="flex items-center gap-2.5 rounded-lg border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive">
+                                            <AlertCircleIcon className="size-4 shrink-0" />
+                                            <span>{flash.error}</span>
+                                        </div>
+                                    )}
+                                    {flash?.success && (
+                                        <div className="flex items-center gap-2.5 rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-700 dark:text-emerald-400">
+                                            <CheckCircle2Icon className="size-4 shrink-0" />
+                                            <span>{flash.success}</span>
+                                        </div>
+                                    )}
+                                </>
+                            );
+                        })()}
+                        {children}
+                    </div>
                 </SidebarInset>
             </SidebarProvider>
         </TooltipProvider>
