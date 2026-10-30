@@ -6,6 +6,7 @@ use App\Models\LearningSection;
 use App\Models\Sentence;
 use App\Models\User;
 use App\Models\UserSentenceProgress;
+use App\Services\ModuleProgressService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -13,7 +14,7 @@ use Inertia\Response;
 
 class QuizController extends Controller
 {
-    public function show(Request $request, ?LearningSection $learningSection = null): Response
+    public function show(Request $request, ?LearningSection $learningSection = null): Response|RedirectResponse
     {
         $user = $request->user() ?? User::query()->first();
 
@@ -23,6 +24,10 @@ class QuizController extends Controller
         }
 
         if ($learningSection) {
+            if (ModuleProgressService::isSectionLocked($learningSection, $user)) {
+                return redirect()->route('modules')->with('error', 'Kuis untuk modul ini masih terkunci. Selesaikan modul sebelumnya terlebih dahulu.');
+            }
+
             $learningSection->load('module');
             $sentences = $learningSection->sentences()->with('words')->get();
             $sectionContext = [
