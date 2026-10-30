@@ -1,4 +1,4 @@
-export type Difficulty = 'beginner' | 'intermediate' | 'advanced';
+export type Difficulty = 'beginner' | 'upper beginner' | 'intermediate' | 'upper intermediate' | 'advanced';
 
 export interface WordBreakdown {
     word: string;
@@ -48,5 +48,7 @@ export interface ModuleWithSections {
     description: string | null;
     difficulty: Difficulty;
     completedSections: number;
+    isCompleted?: boolean;
+    isLocked?: boolean;
     sections: SectionOverview[];
 }
