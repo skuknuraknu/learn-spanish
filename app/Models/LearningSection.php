@@ -24,4 +24,9 @@ class LearningSection extends Model
     {
         return $this->hasMany(Sentence::class)->orderBy('order_index');
     }
+
+    public function quizQuestions(): HasMany
+    {
+        return $this->hasMany(QuizQuestion::class)->orderBy('order_index');
+    }
 }
