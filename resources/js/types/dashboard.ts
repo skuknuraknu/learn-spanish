@@ -1,4 +1,4 @@
-export type ModuleStatus = 'not_started' | 'in_progress' | 'completed';
+export type ModuleStatus = 'not_started' | 'in_progress' | 'completed' | 'locked';
 
 export interface DashboardStats {
     streak: number;
@@ -19,11 +19,12 @@ export interface ModuleOverview {
     id: number;
     title: string;
     description: string | null;
-    difficulty: 'beginner' | 'intermediate' | 'advanced';
+    difficulty: 'beginner' | 'upper beginner' | 'intermediate' | 'upper intermediate' | 'advanced';
     sectionCount: number;
     sentenceCount: number;
     progress: number;
     status: ModuleStatus;
+    isLocked?: boolean;
 }
 
 export interface DashboardPageProps {

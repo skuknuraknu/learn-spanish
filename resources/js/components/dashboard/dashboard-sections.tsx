@@ -5,6 +5,7 @@ import {
     FlameIcon,
     HandshakeIcon,
     HotelIcon,
+    LockIcon,
     PlayIcon,
     SproutIcon,
     TargetIcon,
@@ -27,6 +28,7 @@ const STATUS: Record<ModuleStatus, { label: string; icon: LucideIcon; className:
     completed: { label: 'Completed', icon: CheckCircle2Icon, className: 'text-emerald-600 dark:text-emerald-400' },
     in_progress: { label: 'In progress', icon: SproutIcon, className: 'text-amber-600 dark:text-amber-400' },
     not_started: { label: 'Not started', icon: CircleDashedIcon, className: 'text-muted-foreground' },
+    locked: { label: 'Locked', icon: LockIcon, className: 'text-muted-foreground' },
 };
 
 function initials(name: string) {
@@ -47,7 +49,7 @@ export function WelcomeHeader({ userName, stats }: { userName: string; stats: Da
 
     return (
         <section aria-labelledby="welcome-title" className="flex flex-col gap-4">
-            <div className="flex items-center gap-3">
+            <div data-motion="greeting" className="flex items-center gap-3">
                 <Avatar size="lg">
                     <AvatarFallback>{initials(userName)}</AvatarFallback>
                 </Avatar>
@@ -62,7 +64,7 @@ export function WelcomeHeader({ userName, stats }: { userName: string; stats: Da
             </div>
             <ul className="grid grid-cols-1 gap-3 sm:grid-cols-3">
                 {items.map(({ label, value, icon: Icon, tone }) => (
-                    <li key={label}>
+                    <li key={label} data-motion="stat">
                         <Card size="sm">
                             <CardContent className="flex items-center gap-3">
                                 <span className="flex size-10 items-center justify-center rounded-lg bg-muted">
@@ -95,7 +97,7 @@ export function ContinueLearningCard({ current }: { current: CurrentSection | nu
     }
 
     return (
-        <Card className="bg-primary/5">
+        <Card data-motion="continue" className="bg-primary/5">
             <CardHeader>
                 <CardDescription>{current.started ? 'Continue learning' : 'Start learning'}</CardDescription>
                 <CardTitle className="text-lg sm:text-xl">{current.moduleTitle}</CardTitle>
@@ -132,32 +134,45 @@ export function ModulesGrid({ modules }: { modules: ModuleOverview[] }) {
                 <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
                     {modules.map((m, i) => {
                         const Icon = MODULE_ICONS[i % MODULE_ICONS.length];
-                        const status = STATUS[m.status];
+                        const isLocked = m.isLocked || m.status === 'locked';
+                        const status = STATUS[m.status] ?? STATUS.not_started;
                         const StatusIcon = status.icon;
                         return (
-                            <li key={m.id}>
-                                <Card className="h-full">
+                            <li key={m.id} data-motion="module">
+                                <Card className={cn('h-full transition-all', isLocked ? 'border-dashed bg-muted/20 opacity-75' : 'hover:border-primary/40')}>
                                     <CardHeader>
                                         <div className="flex items-start justify-between gap-2">
-                                            <span className="flex size-10 items-center justify-center rounded-lg bg-muted">
-                                                <Icon className="size-5" aria-hidden="true" />
+                                            <span className={cn('flex size-10 items-center justify-center rounded-lg', isLocked ? 'bg-muted text-muted-foreground' : 'bg-muted')}>
+                                                {isLocked ? (
+                                                    <LockIcon className="size-5 text-muted-foreground" aria-hidden="true" />
+                                                ) : (
+                                                    <Icon className="size-5" aria-hidden="true" />
+                                                )}
                                             </span>
-                                            <Badge variant="secondary" className="capitalize">
-                                                {m.difficulty}
-                                            </Badge>
+                                            <div className="flex items-center gap-1.5">
+                                                {isLocked && (
+                                                    <Badge variant="outline" className="gap-1 border-muted-foreground/30 text-[11px] font-normal text-muted-foreground">
+                                                        <LockIcon className="size-3" />
+                                                        Locked
+                                                    </Badge>
+                                                )}
+                                                <Badge variant="secondary" className="capitalize">
+                                                    {m.difficulty}
+                                                </Badge>
+                                            </div>
                                         </div>
-                                        <CardTitle>{m.title}</CardTitle>
+                                        <CardTitle className={cn(isLocked && 'text-muted-foreground')}>{m.title}</CardTitle>
                                         {m.description && <CardDescription>{m.description}</CardDescription>}
                                     </CardHeader>
                                     <CardContent className="mt-auto flex flex-col gap-3">
-                                        <Progress value={m.progress} aria-label={`${m.title} progress`} />
+                                        <Progress value={m.progress} aria-label={`${m.title} progress`} className={cn(isLocked && 'opacity-40')} />
                                         <div className="flex items-center justify-between text-xs">
                                             <span className={cn('flex items-center gap-1 font-medium', status.className)}>
                                                 <StatusIcon className="size-3.5" aria-hidden="true" />
                                                 {status.label}
                                             </span>
                                             <span className="text-muted-foreground">
-                                                {m.sectionCount} sections · {m.sentenceCount} sentences
+                                                {isLocked ? 'Complete previous module' : `${m.sectionCount} sections · ${m.sentenceCount} sentences`}
                                             </span>
                                         </div>
                                     </CardContent>

@@ -28,8 +28,9 @@ class DashboardController extends Controller
         $current = null;
         $totalSentences = 0;
         $totalMastered = 0;
+        $isUnlocked = true;
 
-        $moduleData = $modules->map(function (LearningModule $module) use ($progress, &$current, &$totalSentences, &$totalMastered) {
+        $moduleData = $modules->map(function (LearningModule $module) use ($progress, &$current, &$totalSentences, &$totalMastered, &$isUnlocked) {
             $sentenceCount = 0;
             $mastered = 0;
 
@@ -39,8 +40,8 @@ class DashboardController extends Controller
                 $sentenceCount += $ids->count();
                 $mastered += $sectionMastered;
 
-                // The current section is the first one that isn't fully mastered.
-                if ($current === null && $ids->count() > 0 && $sectionMastered < $ids->count()) {
+                // The current section is the first one that isn't fully mastered in an unlocked module.
+                if ($isUnlocked && $current === null && $ids->count() > 0 && $sectionMastered < $ids->count()) {
                     $current = [
                         'moduleTitle' => $module->title,
                         'sectionTitle' => $section->title,
@@ -56,7 +57,15 @@ class DashboardController extends Controller
             $totalMastered += $mastered;
 
             $pct = $sentenceCount ? (int) round($mastered / $sentenceCount * 100) : 0;
+            $isCompleted = $pct === 100 && $sentenceCount > 0;
             $started = $module->sections->flatMap->sentences->contains(fn ($s) => isset($progress[$s->id]));
+
+            $isLocked = ! $isUnlocked;
+            if (! $isCompleted) {
+                $isUnlocked = false;
+            }
+
+            $status = $isLocked ? 'locked' : ($isCompleted ? 'completed' : ($started ? 'in_progress' : 'not_started'));
 
             return [
                 'id' => $module->id,
@@ -66,7 +75,8 @@ class DashboardController extends Controller
                 'sectionCount' => $module->sections->count(),
                 'sentenceCount' => $sentenceCount,
                 'progress' => $pct,
-                'status' => $pct === 100 && $sentenceCount > 0 ? 'completed' : ($started ? 'in_progress' : 'not_started'),
+                'status' => $status,
+                'isLocked' => $isLocked,
             ];
         })->values();
 
