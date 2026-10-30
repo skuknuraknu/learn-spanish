@@ -20,10 +20,12 @@ class ModuleController extends Controller
             ? UserSentenceProgress::where('user_id', $user->id)->where('status', 'mastered')->pluck('sentence_id')->flip()
             : collect();
 
+        $isUnlocked = true;
+
         $modules = LearningModule::with('sections.sentences:id,learning_section_id')
             ->orderBy('order_index')
             ->get()
-            ->map(function (LearningModule $module) use ($mastered) {
+            ->map(function (LearningModule $module) use ($mastered, &$isUnlocked) {
                 $sections = $module->sections->map(function ($section) use ($mastered) {
                     $ids = $section->sentences->pluck('id');
                     $done = $ids->filter(fn ($id) => $mastered->has($id))->count();
@@ -38,12 +40,23 @@ class ModuleController extends Controller
                     ];
                 })->values();
 
+                $totalSentences = $sections->sum('sentenceCount');
+                $totalMastered = $sections->sum('masteredCount');
+                $isCompleted = $totalSentences > 0 && $totalMastered === $totalSentences;
+
+                $isLocked = ! $isUnlocked;
+                if (! $isCompleted) {
+                    $isUnlocked = false;
+                }
+
                 return [
                     'id' => $module->id,
                     'title' => $module->title,
                     'description' => $module->description,
                     'difficulty' => $module->difficulty_level,
                     'completedSections' => $sections->where('completed', true)->count(),
+                    'isCompleted' => $isCompleted,
+                    'isLocked' => $isLocked,
                     'sections' => $sections,
                 ];
             })->values();
