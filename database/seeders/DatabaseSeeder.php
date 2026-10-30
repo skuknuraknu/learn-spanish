@@ -64,6 +64,9 @@ class DatabaseSeeder extends Seeder
             }
         }
 
+        // Modules 4-13 (upper beginner → advanced) with tricky quiz questions.
+        $this->call(AdvancedModulesSeeder::class);
+
         // Demo progress: Modul 1 / Section 1 mastered, Section 2 in progress, reviewed 3 days in a row.
         $sentences = Sentence::orderBy('learning_section_id')->orderBy('order_index')->get();
         foreach ($sentences->take(8) as $i => $sentence) {

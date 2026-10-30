@@ -8,8 +8,14 @@ namespace Database\Seeders\Support;
  */
 class SpanishCatalog
 {
-    /** word => [literal translation, part of speech, grammar notes] */
+    /** Base + advanced lexicon merged. */
     public static function lexicon(): array
+    {
+        return self::baseLexicon() + AdvancedCatalog::lexicon();
+    }
+
+    /** word => [literal translation, part of speech, grammar notes] */
+    public static function baseLexicon(): array
     {
         return [
             'mucho' => ['much / very', 'adverb', 'Used before "gusto" in the fixed greeting "mucho gusto".'],
@@ -216,11 +222,17 @@ class SpanishCatalog
         ];
     }
 
+    /** Modules 1-3 plus the advanced modules 4-13. */
+    public static function allModules(): array
+    {
+        return array_merge(self::modules(), AdvancedCatalog::modules());
+    }
+
     /** Flattened [spanish, english, category, difficulty] for random factory picks. */
     public static function allSentences(): array
     {
         $out = [];
-        foreach (self::modules() as $module) {
+        foreach (self::allModules() as $module) {
             foreach ($module['sections'] as $section) {
                 foreach ($section['sentences'] as [$es, $en]) {
                     $out[] = [$es, $en, $section['category'], $module['difficulty']];
