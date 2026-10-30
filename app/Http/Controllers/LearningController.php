@@ -6,6 +6,7 @@ use App\Models\LearningSection;
 use App\Models\Sentence;
 use App\Models\User;
 use App\Models\UserSentenceProgress;
+use App\Services\ModuleProgressService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -30,8 +31,13 @@ class LearningController extends Controller
             : redirect()->route('modules');
     }
 
-    public function show(Request $request, LearningSection $learningSection): Response
+    public function show(Request $request, LearningSection $learningSection): Response|RedirectResponse
     {
+        $user = $request->user() ?? User::query()->first();
+        if (ModuleProgressService::isSectionLocked($learningSection, $user)) {
+            return redirect()->route('modules')->with('error', 'Modul ini masih terkunci. Selesaikan modul sebelumnya terlebih dahulu.');
+        }
+
         $mastered = $this->masteredIds($request);
         $section = $learningSection->load('module');
 
